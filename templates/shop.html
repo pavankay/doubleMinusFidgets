@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Shop{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Our Products</h1>
+</div>
+
+<div class="page-content">
+    <div class="product-grid">
+        {% for fidget in fidgets %}
+        <div class="product-card">
+            <div class="product-image">
+                <img src="{{ fidget.image }}" alt="{{ fidget.name }}">
+                <div class="quick-view">
+                    <a href="{{ url_for('product', id=fidget.id) }}" class="btn-quick-view">Quick View</a>
+                </div>
+            </div>
+            <div class="product-info">
+                <h3 class="product-title">{{ fidget.name }}</h3>
+                <p class="product-price">${{ "%.2f"|format(fidget.price) }}</p>
+                <p class="product-description">{{ fidget.description }}</p>
+                <div class="product-actions">
+                    <button class="btn btn-primary w-full">Add to Cart</button>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Cart{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Shopping Cart</h1>
+</div>
+
+<div class="page-content">
+    <div class="card w-1/2" style="margin: 0 auto;">
+        {% if items %}
+            <div class="cart-items">
+                <div class="cart-item">
+                    <img src="/static/images/spinner.jpg" alt="Product" class="cart-item-image">
+                    <div class="cart-item-info">
+                        <h3>Premium Spinner Pro</h3>
+                        <p class="cart-item-price">$19.99</p>
+                    </div>
+                    <div class="cart-item-quantity">
+                        <button class="btn btn-sm btn-outline">-</button>
+                        <span>1</span>
+                        <button class="btn btn-sm btn-outline">+</button>
+                    </div>
+                    <button class="btn btn-sm btn-remove">Remove</button>
+                </div>
+
+                <div class="cart-summary">
+                    <div class="summary-item">
+                        <span>Total</span>
+                        <span class="total-price">$19.99</span>
+                    </div>
+                    <button class="btn btn-primary btn-lg w-full">Checkout</button>
+                </div>
+            </div>
+        {% else %}
+            <div class="empty-cart">
+                <p>Your cart is empty</p>
+                <a href="/shop" class="btn btn-primary">Shop Now</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

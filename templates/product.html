@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}{{ fidget.name }}{% endblock %}
+
+{% block content %}
+<div class="product-detail">
+    {% if fidget %}
+    <div class="product-detail-image">
+        <img src="{{ fidget.image }}" alt="{{ fidget.name }}">
+    </div>
+    <div class="product-detail-info">
+        <div class="product-category">{{ fidget.category }}</div>
+        <h1>{{ fidget.name }}</h1>
+        <p class="product-detail-price">${{ "%.2f"|format(fidget.price) }}</p>
+        <p class="product-detail-description">{{ fidget.description }}</p>
+        <div class="btn-group">
+            <button class="btn btn-primary btn-lg btn-ripple">Add to Cart</button>
+            <button class="btn btn-outline btn-lg">Save for Later</button>
+        </div>
+    </div>
+    {% else %}
+    <div class="product-loading">
+        <div class="loading-shimmer"></div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Double Minus Fidgets - {% block title %}{% endblock %}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/main.css') }}">
+</head>
+<body>
+    <header class="header">
+        <nav class="navbar">
+            <a href="/" class="nav-link">Home</a>
+            <a href="/shop" class="nav-link">Shop</a>
+            <a href="/about" class="nav-link">About</a>
+            <a href="/cart" class="nav-link cart-link">Cart <span class="cart-count">0</span></a>
+        </nav>
+    </header>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <p>&copy; 2024 Double Minus Fidgets</p>
+        </div>
+    </footer>
+
+<script>
+    // Add 'home-nav' class only on home page
+    if (window.location.pathname === '/') {
+        document.querySelector('.header').classList.add('home-nav');
+    }
+</script>
+</body>
+</html>
