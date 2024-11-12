@@ -1,31 +1,268 @@
 {% extends "base.html" %}
 {% block title %}Shop{% endblock %}
 
+{% block head %}
+<!-- Add any additional head elements -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+{% endblock %}
+
 {% block content %}
 <div class="page-header">
-    <h1>Our Products</h1>
+    <div class="header-content">
+        <h1>Our Products</h1>
+        <p class="subtitle">Explore our collection of premium fidget toys</p>
+    </div>
 </div>
 
 <div class="page-content">
-    <div class="product-grid">
-        {% for fidget in fidgets %}
-        <div class="product-card">
-            <div class="product-image">
-                <img src="{{ fidget.image }}" alt="{{ fidget.name }}">
-                <div class="quick-view">
-                    <a href="{{ url_for('product', id=fidget.id) }}" class="btn-quick-view">Quick View</a>
+    <div class="shop-container">
+        <!-- Products Grid -->
+        <div class="product-grid">
+            {% for fidget in fidgets %}
+            <div class="product-card" data-price="{{ fidget.price }}" data-name="{{ fidget.name }}">
+                <div class="product-image">
+                    <img src="{{ fidget.image }}" alt="{{ fidget.name }}" loading="lazy">
+                    <div class="product-actions">
+                        <a href="{{ url_for('product', id=fidget.id) }}" class="btn btn-secondary btn-sm">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                            </svg>
+                            View Details
+                        </a>
+                        <button
+                            class="btn btn-primary btn-sm add-to-cart-btn"
+                            onclick="addToCart({{ fidget|tojson|safe }})"
+                            data-product-id="{{ fidget.id }}"
+                        >
+                            <svg class="cart-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="9" cy="21" r="1"></circle>
+                                <circle cx="20" cy="21" r="1"></circle>
+                                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                            </svg>
+                            Add to Cart
+                        </button>
+                    </div>
+                </div>
+                <div class="product-info">
+                    <h3 class="product-title">{{ fidget.name }}</h3>
+                    <p class="product-price">${{ "%.2f"|format(fidget.price) }}</p>
+                    <p class="product-description">{{ fidget.description }}</p>
                 </div>
             </div>
-            <div class="product-info">
-                <h3 class="product-title">{{ fidget.name }}</h3>
-                <p class="product-price">${{ "%.2f"|format(fidget.price) }}</p>
-                <p class="product-description">{{ fidget.description }}</p>
-                <div class="product-actions">
-                    <button class="btn btn-primary w-full">Add to Cart</button>
-                </div>
-            </div>
+            {% endfor %}
         </div>
-        {% endfor %}
     </div>
 </div>
+
+<style>
+/* Shop Container */
+.shop-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+/* Product Grid */
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 2rem;
+    margin-bottom: 4rem;
+}
+
+/* Product Card */
+.product-card {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.product-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 20px rgba(0,0,0,0.1);
+}
+
+/* Product Image */
+.product-image {
+    position: relative;
+    aspect-ratio: 1;
+    overflow: hidden;
+    background: #F9FAFB;
+}
+
+.product-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.product-card:hover .product-image img {
+    transform: scale(1.05);
+}
+
+/* Product Actions */
+.product-actions {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 1rem;
+    display: flex;
+    gap: 0.75rem;
+    background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
+}
+
+.product-card:hover .product-actions {
+    transform: translateY(0);
+}
+
+/* Product Info */
+.product-info {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    flex: 1;
+}
+
+.product-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1F2937;
+    margin: 0;
+}
+
+.product-price {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #3B82F6;
+    margin: 0;
+}
+
+.product-description {
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: #6B7280;
+    margin: 0;
+    flex-grow: 1;
+}
+
+/* Button Icon Alignment */
+.btn svg {
+    flex-shrink: 0;
+}
+
+/* Animations */
+@keyframes addedToCart {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.added-to-cart {
+    animation: addedToCart 0.3s ease;
+}
+
+/* Loading State */
+.btn-loading {
+    color: transparent !important;
+    position: relative;
+}
+
+.btn-loading:after {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    top: 50%;
+    left: 50%;
+    margin: -8px 0 0 -8px;
+    border: 2px solid transparent;
+    border-top-color: currentColor;
+    border-radius: 50%;
+    animation: button-loading 0.8s ease infinite;
+}
+
+@keyframes button-loading {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .product-grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 1rem;
+    }
+
+    .product-actions {
+        transform: translateY(0);
+        background: rgba(0,0,0,0.7);
+    }
+}
+</style>
+
+<script>
+// Add to Cart Function
+function addToCart(product) {
+    const button = document.querySelector(`[data-product-id="${product.id}"]`);
+    if (!button) return;
+
+    // Add loading state
+    button.classList.add('btn-loading');
+    button.disabled = true;
+
+    try {
+        // Add to cart using CartManager
+        window.cartManager.addToCart(product);
+
+        // Add success animation
+        button.classList.add('added-to-cart');
+
+        // Remove loading state and success animation after animation completes
+        setTimeout(() => {
+            button.classList.remove('btn-loading', 'added-to-cart');
+            button.disabled = false;
+        }, 500);
+
+    } catch (error) {
+        console.error('Error adding to cart:', error);
+        window.cartManager.showNotification('Error adding to cart', 'error');
+
+        // Remove loading state
+        button.classList.remove('btn-loading');
+        button.disabled = false;
+    }
+}
+
+// Lazy Loading for Images
+document.addEventListener('DOMContentLoaded', () => {
+    const images = document.querySelectorAll('img[loading="lazy"]');
+
+    if ('loading' in HTMLImageElement.prototype) {
+        // Browser supports lazy loading
+        images.forEach(img => {
+            img.src = img.getAttribute('src');
+        });
+    } else {
+        // Fallback for browsers that don't support lazy loading
+        const lazyLoadScript = document.createElement('script');
+        lazyLoadScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/lozad.js/1.16.0/lozad.min.js';
+        document.body.appendChild(lazyLoadScript);
+
+        lazyLoadScript.onload = () => {
+            const observer = lozad(images);
+            observer.observe();
+        };
+    }
+});
+</script>
 {% endblock %}

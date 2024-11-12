@@ -1,6 +1,7 @@
 from flask import Flask, render_template, jsonify, request
 import random
 import string
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -12,70 +13,31 @@ def generate_order_id():
     return f"{letters}_{numbers}"
 
 
-# Sample fidget data
 fidgets = [
     {
         "id": 1,
         "name": "Premium Spinner Pro",
         "price": 19.99,
         "description": "High-quality metal spinner with ultra-smooth bearings",
-        "image": "/static/images/spinner.jpg"
+        "image": "https://placehold.co/400x400?text=Spinner+Pro"  # Using placeholder
     },
     {
         "id": 2,
         "name": "Infinity Cube Classic",
         "price": 14.99,
         "description": "Endless flipping satisfaction in your pocket",
-        "image": "/static/images/cube.jpg"
+        "image": "https://placehold.co/400x400?text=Infinity+Cube"  # Using placeholder
     },
     {
         "id": 3,
         "name": "Pop It Rainbow",
         "price": 9.99,
         "description": "Colorful bubble popping sensory toy",
-        "image": "/static/images/popit.jpg"
+        "image": "https://placehold.co/400x400?text=Pop+It"  # Using placeholder
     }
 ]
 
-# Orders data
-orders = [
-    {
-        "id": "abcd_1234",
-        "user_id": "abcd_1234",
-        "date": "March 3, 2024",
-        "total": 54.97,
-        "status": "Pending",
-        "order_items": [
-            {
-                "name": "Premium Spinner Pro",
-                "quantity": 2,
-                "price": 19.99
-            },
-            {
-                "name": "Infinity Cube Classic",
-                "quantity": 1,
-                "price": 14.99
-            }
-        ]
-    },
-    {
-        "id": "efgh_5678",
-        "user_id": "efgh_5678",
-        "date": "March 2, 2024",
-        "total": 29.97,
-        "status": "Completed",
-        "order_items": [
-            {
-                "name": "Pop It Rainbow",
-                "quantity": 3,
-                "price": 9.99
-            }
-        ]
-    }
-]
-
-# Shopping cart data
-cart_items = []
+orders = {}
 
 
 @app.route('/')
@@ -95,113 +57,109 @@ def about():
 
 @app.route('/cart')
 def cart():
-    cart_total = sum(item.get('price', 0) * item.get('quantity', 0) for item in cart_items)
-    return render_template('cart.html', items=cart_items, total=cart_total)
+    # Cart page now relies on localStorage
+    return render_template('cart.html')
 
 
 @app.route('/product/<int:id>')
 def product(id):
     fidget = next((item for item in fidgets if item["id"] == id), None)
-    return render_template('product.html', fidget=fidget)
+    if fidget:
+        return render_template('product.html', fidget=fidget)
+    return render_template('404.html'), 404
 
 
 @app.route('/admin')
 def admin():
-    pending_orders = [order for order in orders if order['status'] == 'Pending']
-    completed_orders = [order for order in orders if order['status'] == 'Completed']
-    return render_template('admin.html', orders=orders)
+    # Convert orders dictionary to list and sort by date
+    orders_list = sorted(
+        orders.values(),
+        key=lambda x: datetime.strptime(x['date'], '%B %d, %Y'),
+        reverse=True
+    )
+    return render_template('admin.html', orders=orders_list)
 
 
-# Shopping Cart Functions
-@app.route('/add_to_cart', methods=['POST'])
-def add_to_cart():
-    data = request.json
-    product_id = data.get('product_id')
-
-    fidget = next((item for item in fidgets if item["id"] == product_id), None)
-    if fidget:
-        cart_item = next((item for item in cart_items if item["id"] == product_id), None)
-        if cart_item:
-            cart_item["quantity"] += 1
-        else:
-            cart_items.append({
-                "id": fidget["id"],
-                "name": fidget["name"],
-                "price": fidget["price"],
-                "quantity": 1
-            })
-        return jsonify({"success": True, "cart_count": len(cart_items)})
-    return jsonify({"success": False})
+# API endpoints
+@app.route('/api/products', methods=['GET'])
+def get_products():
+    """Get all products"""
+    return jsonify(fidgets)
 
 
-@app.route('/update_cart', methods=['POST'])
-def update_cart():
-    data = request.json
-    product_id = data.get('product_id')
-    quantity = data.get('quantity')
-
-    cart_item = next((item for item in cart_items if item["id"] == product_id), None)
-    if cart_item:
-        if quantity > 0:
-            cart_item["quantity"] = quantity
-        else:
-            cart_items.remove(cart_item)
-        return jsonify({"success": True, "cart_count": len(cart_items)})
-    return jsonify({"success": False})
+@app.route('/api/products/<int:id>', methods=['GET'])
+def get_product(id):
+    """Get a specific product"""
+    product = next((item for item in fidgets if item["id"] == id), None)
+    if product:
+        return jsonify(product)
+    return jsonify({"error": "Product not found"}), 404
 
 
-@app.route('/remove_from_cart', methods=['POST'])
-def remove_from_cart():
-    data = request.json
-    product_id = data.get('product_id')
+@app.route('/api/orders/create', methods=['POST'])
+def create_order():
+    """Create a new order"""
+    try:
+        data = request.json
 
-    cart_item = next((item for item in cart_items if item["id"] == product_id), None)
-    if cart_item:
-        cart_items.remove(cart_item)
-        return jsonify({"success": True, "cart_count": len(cart_items)})
-    return jsonify({"success": False})
+        # Validate order data
+        if not data or 'items' not in data:
+            return jsonify({"error": "Invalid order data"}), 400
+
+        # Create new order
+        order_id = generate_order_id()
+        new_order = {
+            "id": order_id,
+            "user_id": generate_order_id(),  # In a real app, this would be the actual user ID
+            "date": datetime.now().strftime('%B %d, %Y'),
+            "total": data.get('totalPrice', 0),
+            "status": "Pending",
+            "order_items": data.get('items', [])
+        }
+
+        # Store order
+        orders[order_id] = new_order
+
+        return jsonify({
+            "success": True,
+            "orderId": order_id,
+            "message": "Order created successfully"
+        })
+
+    except Exception as e:
+        return jsonify({
+            "error": "Failed to create order",
+            "message": str(e)
+        }), 500
 
 
-@app.route('/complete_order/<order_id>', methods=['POST'])
+@app.route('/api/orders/<order_id>', methods=['GET'])
+def get_order(order_id):
+    """Get a specific order"""
+    if order_id in orders:
+        return jsonify(orders[order_id])
+    return jsonify({"error": "Order not found"}), 404
+
+
+@app.route('/api/orders/<order_id>/complete', methods=['POST'])
 def complete_order(order_id):
-    order = next((order for order in orders if order['id'] == order_id), None)
+    """Mark an order as completed"""
+    if order_id in orders:
+        orders[order_id]['status'] = "Completed"
+        return jsonify({
+            "success": True,
+            "message": "Order marked as completed"
+        })
+    return jsonify({"error": "Order not found"}), 404
+
+
+@app.route('/order-confirmation/<order_id>')
+def order_confirmation(order_id):
+    """Order confirmation page"""
+    order = orders.get(order_id)
     if order:
-        order['status'] = "Completed"
-        return jsonify({"success": True})
-    return jsonify({"success": False}), 404
-
-
-@app.route('/checkout', methods=['POST'])
-def checkout():
-    if not cart_items:
-        return jsonify({"success": False, "message": "Cart is empty"}), 400
-
-    # Calculate total
-    total = sum(item['price'] * item['quantity'] for item in cart_items)
-
-    # Create new order
-    new_order = {
-        "id": generate_order_id(),
-        "user_id": generate_order_id(),  # In a real app, this would be the actual user ID
-        "date": "March 3, 2024",  # In a real app, use actual date
-        "total": total,
-        "status": "Pending",
-        "order_items": [
-            {
-                "name": item['name'],
-                "quantity": item['quantity'],
-                "price": item['price']
-            } for item in cart_items
-        ]
-    }
-
-    # Add order to orders list
-    orders.append(new_order)
-
-    # Clear cart
-    cart_items.clear()
-
-    return jsonify({"success": True, "order_id": new_order['id']})
+        return render_template('order-confirmation.html', order=order)
+    return render_template('404.html'), 404
 
 
 # Error handlers

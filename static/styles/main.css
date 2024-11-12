@@ -35,3 +35,101 @@ body {
 main {
     flex: 1;
 }
+
+/* Add this to your main.css or create a header.css */
+
+.page-header {
+    background: linear-gradient(135deg, #2563EB 0%, #3B82F6 100%);
+    padding: 4rem 2rem;
+    text-align: center;
+    margin-bottom: 2rem;
+    position: relative;
+    color: white;
+    overflow: hidden;
+}
+
+.page-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><circle cx="2" cy="2" r="1" fill="rgba(255,255,255,0.1)"/></svg>');
+    opacity: 0.3;
+    animation: float 30s linear infinite;
+}
+
+.page-header .header-content {
+    position: relative;
+    z-index: 1;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.page-header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: white;
+}
+
+.page-header .subtitle {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    margin-top: 0.5rem;
+}
+
+/* Product grid header specific styles */
+.product-header {
+    background: linear-gradient(135deg, #2563EB 0%, #3B82F6 100%);
+    padding: 3rem 2rem;
+    text-align: center;
+    margin-bottom: 2rem;
+    position: relative;
+    color: white;
+}
+
+.product-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><circle cx="2" cy="2" r="1" fill="rgba(255,255,255,0.1)"/></svg>');
+    opacity: 0.3;
+    animation: float 30s linear infinite;
+}
+
+/* Animation for the pattern overlay */
+@keyframes float {
+    from {
+        transform: translateY(0);
+    }
+    to {
+        transform: translateY(-20px);
+    }
+}
+
+/* Page content spacing */
+.page-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .page-header {
+        padding: 3rem 1rem;
+    }
+
+    .page-header h1 {
+        font-size: 2rem;
+    }
+
+    .page-header .subtitle {
+        font-size: 1rem;
+    }
+}

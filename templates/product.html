@@ -4,23 +4,262 @@
 {% block content %}
 <div class="product-detail">
     {% if fidget %}
-    <div class="product-detail-image">
-        <img src="{{ fidget.image }}" alt="{{ fidget.name }}">
-    </div>
-    <div class="product-detail-info">
-        <div class="product-category">{{ fidget.category }}</div>
-        <h1>{{ fidget.name }}</h1>
-        <p class="product-detail-price">${{ "%.2f"|format(fidget.price) }}</p>
-        <p class="product-detail-description">{{ fidget.description }}</p>
-        <div class="btn-group">
-            <button class="btn btn-primary btn-lg btn-ripple">Add to Cart</button>
-            <button class="btn btn-outline btn-lg">Save for Later</button>
+    <div class="product-container">
+        <div class="product-image-section">
+            <div class="product-image">
+                <img src="{{ fidget.image }}" alt="{{ fidget.name }}" class="primary-image">
+            </div>
+        </div>
+
+        <div class="product-info-section">
+            <nav class="product-breadcrumb">
+                <a href="/shop">Shop</a> / <span>{{ fidget.name }}</span>
+            </nav>
+
+            <div class="product-header">
+                <h1 class="product-title">{{ fidget.name }}</h1>
+                <div class="product-price">${{ "%.2f"|format(fidget.price) }}</div>
+            </div>
+
+            <div class="product-description">
+                {{ fidget.description }}
+            </div>
+
+            <div class="product-actions">
+                <div class="quantity-selector">
+                    <label for="quantity">Quantity:</label>
+                    <div class="quantity-controls">
+                        <button class="quantity-btn decrease" onclick="updateQuantity(-1)">−</button>
+                        <input type="number" id="quantity" value="1" min="1" max="99" readonly>
+                        <button class="quantity-btn increase" onclick="updateQuantity(1)">+</button>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="btn btn-add-to-cart" onclick="addToCart({{ fidget.id }})">
+                        <svg class="cart-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="9" cy="21" r="1"></circle>
+                            <circle cx="20" cy="21" r="1"></circle>
+                            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                        </svg>
+                        Add to Cart
+                    </button>
+                </div>
+            </div>
+
+            <div class="product-meta">
+                <div class="meta-item">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M5 12h14"></path>
+                        <path d="M12 5l7 7-7 7"></path>
+                    </svg>
+                    <span>Free shipping on orders over $50</span>
+                </div>
+                <div class="meta-item">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
+                    <span>30-day satisfaction guarantee</span>
+                </div>
+            </div>
         </div>
     </div>
     {% else %}
-    <div class="product-loading">
-        <div class="loading-shimmer"></div>
+    <div class="product-not-found">
+        <h2>Product Not Found</h2>
+        <p>Sorry, we couldn't find the product you're looking for.</p>
+        <a href="/shop" class="btn btn-primary">Return to Shop</a>
     </div>
     {% endif %}
 </div>
+
+<style>
+.product-detail {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+.product-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.product-image-section {
+    padding: 2rem;
+}
+
+.product-image {
+    aspect-ratio: 1;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.primary-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.product-info-section {
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.product-breadcrumb {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.product-breadcrumb a {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+.product-header {
+    margin-bottom: 1rem;
+}
+
+.product-title {
+    font-size: 2rem;
+    font-weight: 600;
+    color: #1F2937;
+    margin-bottom: 0.5rem;
+}
+
+.product-price {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.product-description {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: #4B5563;
+}
+
+.product-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin: 2rem 0;
+}
+
+.quantity-selector {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.quantity-selector label {
+    font-weight: 500;
+    color: #374151;
+}
+
+.quantity-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.quantity-controls input {
+    width: 3rem;
+    height: 36px;
+    text-align: center;
+    border: 2px solid #E5E7EB;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.product-meta {
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid #E5E7EB;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: #6B7280;
+}
+
+.meta-item svg {
+    flex-shrink: 0;
+    color: var(--primary-color);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .product-container {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+
+    .product-image-section {
+        padding: 1rem;
+    }
+
+    .product-info-section {
+        padding: 1rem;
+    }
+
+    .product-title {
+        font-size: 1.75rem;
+    }
+}
+</style>
+
+<script>
+function updateQuantity(change) {
+    const input = document.getElementById('quantity');
+    let value = parseInt(input.value) + change;
+    value = Math.max(1, Math.min(99, value)); // Clamp between 1 and 99
+    input.value = value;
+}
+
+function addToCart(productId) {
+    const quantity = parseInt(document.getElementById('quantity').value);
+    const button = document.querySelector('.btn-add-to-cart');
+
+    // Add loading state
+    button.classList.add('btn-loading');
+    button.disabled = true;
+
+    // Get product details
+    const product = {
+        id: productId,
+        name: "{{ fidget.name }}",
+        price: {{ fidget.price }},
+        image: "{{ fidget.image }}"
+    };
+
+    // Add to cart using CartManager
+    window.cartManager.addToCart(product, quantity);
+
+    // Remove loading state after a short delay
+    setTimeout(() => {
+        button.classList.remove('btn-loading');
+        button.disabled = false;
+    }, 500);
+}
+
+// Disable manual input on quantity field
+document.getElementById('quantity').addEventListener('keydown', (e) => e.preventDefault());
+</script>
 {% endblock %}
