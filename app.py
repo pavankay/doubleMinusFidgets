@@ -1,9 +1,13 @@
 from flask import Flask, render_template, jsonify, request
+import json
+import logging
+import os
 import random
 import string
 from datetime import datetime
 
 app = Flask(__name__)
+logging.basicConfig(level=logging.INFO)
 
 
 # Helper function to generate order IDs
@@ -37,7 +41,35 @@ fidgets = [
     }
 ]
 
+ORDERS_FILE = os.path.join(os.path.dirname(__file__), 'orders.json')
 orders = {}
+
+
+def load_orders():
+    """Load orders from the JSON file into the global dictionary."""
+    global orders
+    if not os.path.exists(ORDERS_FILE):
+        orders = {}
+        return
+    try:
+        with open(ORDERS_FILE, 'r', encoding='utf-8') as f:
+            orders = json.load(f)
+    except Exception as e:
+        logging.error('Failed to load orders file: %s', e)
+        orders = {}
+
+
+def save_orders():
+    """Persist the current orders dictionary to the JSON file."""
+    try:
+        with open(ORDERS_FILE, 'w', encoding='utf-8') as f:
+            json.dump(orders, f, indent=2)
+    except Exception as e:
+        logging.error('Failed to save orders file: %s', e)
+
+
+# Load existing orders when the app starts
+load_orders()
 
 
 @app.route('/')
@@ -119,6 +151,7 @@ def create_order():
 
         # Store order
         orders[order_id] = new_order
+        save_orders()
 
         return jsonify({
             "success": True,
@@ -146,6 +179,7 @@ def complete_order(order_id):
     """Mark an order as completed"""
     if order_id in orders:
         orders[order_id]['status'] = "Completed"
+        save_orders()
         return jsonify({
             "success": True,
             "message": "Order marked as completed"
