@@ -50,8 +50,8 @@
 </template>
 
 <script>
-// Cart Manager class (moved to separate file)
-const cartManager = new CartManager();
+// Reference the global CartManager instance
+let cartManager;
 
 // Handle empty cart state
 function showEmptyCart() {
@@ -85,7 +85,7 @@ function updateCartItem(item) {
 
 // Update entire cart display
 function updateCartDisplay() {
-    const cart = cartManager.getCart();
+    const cart = cartManager.cart;
     const cartItemsContainer = document.getElementById('cart-items');
     const cartTotalElement = document.getElementById('cart-total');
     const cartSubtotalElement = document.getElementById('cart-subtotal');
@@ -111,6 +111,7 @@ function updateCartDisplay() {
 
 // Event Listeners
 document.addEventListener('DOMContentLoaded', () => {
+    cartManager = window.cartManager;
     updateCartDisplay();
 
     // Event delegation for cart items
