@@ -1,6 +1,8 @@
 from flask import Flask, render_template, jsonify, request
 import random
 import string
+import json
+import os
 from datetime import datetime
 
 app = Flask(__name__)
@@ -38,6 +40,37 @@ fidgets = [
 ]
 
 orders = {}
+ORDER_FILE = "orders.json"
+
+
+def load_orders():
+    """Load orders from the JSON file into the orders dictionary"""
+    global orders
+    if os.path.exists(ORDER_FILE):
+        try:
+            with open(ORDER_FILE, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+                if isinstance(data, list):
+                    orders = {o['id']: o for o in data}
+        except Exception as exc:
+            print(f"Failed to load orders: {exc}")
+            orders = {}
+    else:
+        with open(ORDER_FILE, 'w', encoding='utf-8') as f:
+            json.dump([], f)
+
+
+def save_orders():
+    """Persist all orders to the JSON file"""
+    try:
+        with open(ORDER_FILE, 'w', encoding='utf-8') as f:
+            json.dump(list(orders.values()), f, indent=2)
+    except Exception as exc:
+        print(f"Failed to save orders: {exc}")
+
+
+# Load any existing orders when the module is imported
+load_orders()
 
 
 @app.route('/')
@@ -120,6 +153,9 @@ def create_order():
         # Store order
         orders[order_id] = new_order
 
+        # Persist order list to file for basic record keeping
+        save_orders()
+
         return jsonify({
             "success": True,
             "orderId": order_id,
@@ -146,6 +182,7 @@ def complete_order(order_id):
     """Mark an order as completed"""
     if order_id in orders:
         orders[order_id]['status'] = "Completed"
+        save_orders()
         return jsonify({
             "success": True,
             "message": "Order marked as completed"
