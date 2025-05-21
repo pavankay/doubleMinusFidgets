@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Order Confirmation{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Thank you for your order!</h1>
+</div>
+
+<div class="page-content">
+    <div class="card text-center">
+        <h2 class="mb-3">Order {{ order.id }}</h2>
+        <p class="mb-4">We appreciate your business! Below is a summary of your purchase.</p>
+
+        <div class="mb-4">
+            <ul style="list-style: none; padding: 0;">
+                {% for item in order.order_items %}
+                <li class="mb-2">
+                    {{ item.quantity }}x {{ item.name }} – ${{ "%.2f"|format(item.price * item.quantity) }}
+                </li>
+                {% endfor %}
+            </ul>
+            <strong>Total: ${{ "%.2f"|format(order.total) }}</strong>
+        </div>
+
+        <p class="mb-4">You'll receive an email confirmation with tracking details once your package ships.</p>
+        <a href="/shop" class="btn btn-primary btn-lg">Continue Shopping</a>
+    </div>
+</div>
+{% endblock %}

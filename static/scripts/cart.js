@@ -20,6 +20,10 @@ class CartManager {
         localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.cart));
         this.updateCartDisplay();
     }
+    getCart() {
+        return this.cart;
+    }
+
 
     calculateTotal() {
         this.cart.totalPrice = this.cart.items.reduce((sum, item) =>
