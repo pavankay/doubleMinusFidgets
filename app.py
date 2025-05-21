@@ -1,4 +1,7 @@
 from flask import Flask, render_template, jsonify, request
+import json
+import logging
+import os
 import random
 import string
 import json
@@ -6,6 +9,7 @@ import os
 from datetime import datetime
 
 app = Flask(__name__)
+logging.basicConfig(level=logging.INFO)
 
 
 # Helper function to generate order IDs
@@ -39,6 +43,7 @@ fidgets = [
     }
 ]
 
+ORDERS_FILE = os.path.join(os.path.dirname(__file__), 'orders.json')
 orders = {}
 ORDER_FILE = "orders.json"
 
@@ -70,6 +75,33 @@ def save_orders():
 
 
 # Load any existing orders when the module is imported
+load_orders()
+
+
+def load_orders():
+    """Load orders from the JSON file into the global dictionary."""
+    global orders
+    if not os.path.exists(ORDERS_FILE):
+        orders = {}
+        return
+    try:
+        with open(ORDERS_FILE, 'r', encoding='utf-8') as f:
+            orders = json.load(f)
+    except Exception as e:
+        logging.error('Failed to load orders file: %s', e)
+        orders = {}
+
+
+def save_orders():
+    """Persist the current orders dictionary to the JSON file."""
+    try:
+        with open(ORDERS_FILE, 'w', encoding='utf-8') as f:
+            json.dump(orders, f, indent=2)
+    except Exception as e:
+        logging.error('Failed to save orders file: %s', e)
+
+
+# Load existing orders when the app starts
 load_orders()
 
 
@@ -152,6 +184,7 @@ def create_order():
 
         # Store order
         orders[order_id] = new_order
+        save_orders()
 
         # Persist order list to file for basic record keeping
         save_orders()
