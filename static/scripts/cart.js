@@ -8,6 +8,10 @@ class CartManager {
         this.updateCartDisplay();
     }
 
+    getCart() {
+        return this.cart;
+    }
+
     loadCart() {
         const savedCart = localStorage.getItem(this.STORAGE_KEY);
         return savedCart ? JSON.parse(savedCart) : {
